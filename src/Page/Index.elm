@@ -8,6 +8,12 @@ import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared
 import View exposing (View)
+import Article exposing (..)
+import Html exposing (div)
+import Html.Attributes exposing (class)
+import Html exposing (Html)
+import Date exposing (..)
+import Css exposing (static)
 
 
 type alias Model =
@@ -32,8 +38,8 @@ page =
 
 
 data : DataSource Data
-data =
-    DataSource.succeed ()
+data = Article.staticRequest
+
 
 
 head :
@@ -57,7 +63,7 @@ head static =
 
 
 type alias Data =
-    ()
+    List Entry
 
 
 view :
@@ -66,4 +72,38 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    View.placeholder "Index"
+    { title = "Index"
+    , body = List.map viewArticle static.data }
+
+
+viewArticle : Article.Entry -> Html msg
+viewArticle entry =
+   div [ class "entry" ] 
+   [ div [ class "entry-title" ] [
+           Html.text entry.title
+    ]
+    , div [ class "entry-content" ] [
+           Html.text entry.body
+    ]
+    , div [ class "entry-meta" ] [
+           
+               publishedDateView entry
+    ]
+           
+    
+    , div [ class "entry-tags" ] 
+            (viewTags entry.tags)
+   ]
+
+
+viewTags : List Tag -> List (Html msg)
+viewTags tags =
+    List.map (\tag ->
+        div [ class "tag" ] [
+            Html.text tag.name
+        ]
+    ) tags
+
+publishedDateView : { a | published : Date } -> Html msg
+publishedDateView metadata =
+    Html.text (Date.format "yyy-MM-dd" metadata.published)

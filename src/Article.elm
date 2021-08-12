@@ -1,13 +1,14 @@
-module Article exposing (..)
+module Article exposing (staticRequest, Entry, Tag)
 import DataSource
 import DataSource.Http
+import Date exposing (Date)
 import Pages.Secrets as Secrets
 import OptimizedDecoder as Decode
-import Json.Decode.Pipeline exposing (required, optional, hardcoded)
 
 type alias Entry =
     { title : String
     , body : String
+    , published : Date
     , tags : List Tag
     }
 
@@ -18,7 +19,7 @@ staticRequest =
     DataSource.Http.request
         (Secrets.succeed
             (\apiKey ->
-                { url = "https://api.airtable.com/v0/appDykQzbkQJAidjt/elm-pages%20showcase?maxRecords=100&view=Grid%202"
+                { url = "https://adoringonion.microcms.io/api/v1/blog"
                 , method = "GET"
                 , headers = [ ( "X-API-KEY", apiKey ) ]
                 , body = DataSource.Http.emptyBody
@@ -35,10 +36,20 @@ decoder =
 
 entryDecoder : Decode.Decoder Entry
 entryDecoder =
-        Decode.map3 Entry
-            (Decode.field "title" Decode.string)
-            (Decode.field "body" Decode.string)
-            (Decode.field "tags" <| Decode.list tagDecoder)
+    Decode.map4 Entry
+        (Decode.field "title" Decode.string)
+        (Decode.field "body" Decode.string)
+        (Decode.field "updatedAt"
+            (Decode.string
+                |> Decode.andThen
+                    (\isoString ->
+                        String.slice 0 10 isoString
+                            |> Date.fromIsoString 
+                            |> Decode.fromResult
+                    )
+            )
+        )
+        (Decode.field "tags" <| Decode.list tagDecoder)
 
 
 tagDecoder : Decode.Decoder Tag
