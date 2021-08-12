@@ -7,6 +7,8 @@ import Date exposing (..)
 import Head
 import Head.Seo as Seo
 import Html exposing (Html, div, h1, p, text)
+import Html.Parser as Parser
+import Html.Parser.Util as ParserUtil
 import Markdown
 import Markdown.Config as Config
 import Page exposing (Page, StaticPayload)
@@ -109,11 +111,15 @@ viewPost : Entry -> Html Msg
 viewPost entry =
     div []
         [ h1 [] [ text entry.title ]
-        , viewBody entry.body
+        , div [] (textHtml entry.body)
         ]
 
 
-viewBody : String -> Html Msg
-viewBody body =
-    div [] <|
-        Markdown.toHtml (Just Config.defaultOptions) body
+textHtml : String -> List (Html.Html msg)
+textHtml t =
+    case Parser.run t of
+        Ok nodes ->
+            ParserUtil.toVirtualDom nodes
+
+        Err _ ->
+            []
