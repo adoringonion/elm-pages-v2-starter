@@ -38,7 +38,7 @@ page =
 
 
 data : DataSource Data
-data = Article.staticRequest
+data = Article.allPosts
 
 
 

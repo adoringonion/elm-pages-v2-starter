@@ -1,4 +1,4 @@
-module Article exposing (staticRequest, Entry, Tag)
+module Article exposing (allPosts, Entry, Tag)
 import DataSource
 import DataSource.Http
 import Date exposing (Date)
@@ -6,7 +6,8 @@ import Pages.Secrets as Secrets
 import OptimizedDecoder as Decode
 
 type alias Entry =
-    { title : String
+    { id : String
+    , title : String
     , body : String
     , published : Date
     , tags : List Tag
@@ -14,8 +15,8 @@ type alias Entry =
 
 type alias Tag = { name : String }
 
-staticRequest : DataSource.DataSource (List Entry)
-staticRequest =
+allPosts : DataSource.DataSource (List Entry)
+allPosts =
     DataSource.Http.request
         (Secrets.succeed
             (\apiKey ->
@@ -36,7 +37,8 @@ decoder =
 
 entryDecoder : Decode.Decoder Entry
 entryDecoder =
-    Decode.map4 Entry
+    Decode.map5 Entry
+        (Decode.field "id" Decode.string)
         (Decode.field "title" Decode.string)
         (Decode.field "body" Decode.string)
         (Decode.field "updatedAt"
