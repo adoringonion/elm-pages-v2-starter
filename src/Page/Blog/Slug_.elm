@@ -7,6 +7,8 @@ import Date exposing (..)
 import Head
 import Head.Seo as Seo
 import Html exposing (Html, div, h1, p, text)
+import Markdown
+import Markdown.Config as Config
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
@@ -107,5 +109,11 @@ viewPost : Entry -> Html Msg
 viewPost entry =
     div []
         [ h1 [] [ text entry.title ]
-        , p [] [ text entry.body ]
+        , viewBody entry.body
         ]
+
+
+viewBody : String -> Html Msg
+viewBody body =
+    div [] <|
+        Markdown.toHtml (Just Config.defaultOptions) body
