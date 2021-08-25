@@ -6,16 +6,15 @@ import DataSource
 import Date exposing (..)
 import Head
 import Head.Seo as Seo
-import Html exposing (Html, div, h1, p, text)
 import Html.Parser as Parser
 import Html.Parser.Util as ParserUtil
-import Markdown
-import Markdown.Config as Config
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
 import View exposing (View)
+import Element exposing (..)
+import Element.Region as Region
 
 
 type alias Model =
@@ -107,19 +106,19 @@ view _ _ static =
     }
 
 
-viewPost : Entry -> Html Msg
+viewPost : Entry -> Element Msg
 viewPost entry =
-    div []
-        [ h1 [] [ text entry.title ]
-        , div [] (textHtml entry.body)
+    column []
+        [ el [ Region.heading 1] (text entry.title)
+        , column [] (textHtml entry.body)
         ]
 
 
-textHtml : String -> List (Html.Html msg)
+textHtml : String -> List (Element msg)
 textHtml t =
     case Parser.run t of
         Ok nodes ->
-            ParserUtil.toVirtualDom nodes
+            List.map html (ParserUtil.toVirtualDom nodes)
 
         Err _ ->
             []

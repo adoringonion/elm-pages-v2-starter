@@ -9,11 +9,8 @@ import Pages.Url
 import Shared
 import View exposing (View)
 import Article exposing (..)
-import Html exposing (div)
-import Html.Attributes exposing (class)
-import Html exposing (Html)
 import Date exposing (..)
-import Css exposing (static)
+import Element exposing (..)
 
 
 type alias Model =
@@ -76,34 +73,34 @@ view maybeUrl sharedModel static =
     , body = List.map viewArticle static.data }
 
 
-viewArticle : Article.Entry -> Html msg
+viewArticle : Article.Entry -> Element msg
 viewArticle entry =
-   div [ class "entry" ] 
-   [ div [ class "entry-title" ] [
-           Html.text entry.title
-    ]
-    , div [ class "entry-content" ] [
-           Html.text entry.body
-    ]
-    , div [ class "entry-meta" ] [
+   column [  ] 
+   [ el [ ] 
+           (text entry.title)
+    
+    , el [ ] 
+           (text entry.body)
+    
+    , el [ ] 
            
-               publishedDateView entry
-    ]
+               (publishedDateView entry)
+    
            
     
-    , div [ class "entry-tags" ] 
+    , row [ ] 
             (viewTags entry.tags)
    ]
 
 
-viewTags : List Tag -> List (Html msg)
+viewTags : List Tag -> List (Element msg)
 viewTags tags =
     List.map (\tag ->
-        div [ class "tag" ] [
-            Html.text tag.name
-        ]
+        el [  ] 
+            (text tag.name)
+        
     ) tags
 
-publishedDateView : { a | published : Date } -> Html msg
+publishedDateView : { a | published : Date } -> Element msg
 publishedDateView metadata =
-    Html.text (Date.format "yyy-MM-dd" metadata.published)
+    text (Date.format "yyy-MM-dd" metadata.published)
