@@ -1,9 +1,11 @@
-module Article exposing (allPosts, Entry, Tag)
+module Article exposing (Entry, Tag, allPosts)
+
 import DataSource
 import DataSource.Http
 import Date exposing (Date)
-import Pages.Secrets as Secrets
 import OptimizedDecoder as Decode
+import Pages.Secrets as Secrets
+
 
 type alias Entry =
     { id : String
@@ -13,7 +15,10 @@ type alias Entry =
     , tags : List Tag
     }
 
-type alias Tag = { name : String }
+
+type alias Tag =
+    { id : String, name : String }
+
 
 allPosts : DataSource.DataSource (List Entry)
 allPosts =
@@ -30,10 +35,12 @@ allPosts =
         )
         decoder
 
+
 decoder : Decode.Decoder (List Entry)
 decoder =
     Decode.field "contents" <|
         Decode.list entryDecoder
+
 
 entryDecoder : Decode.Decoder Entry
 entryDecoder =
@@ -46,7 +53,7 @@ entryDecoder =
                 |> Decode.andThen
                     (\isoString ->
                         String.slice 0 10 isoString
-                            |> Date.fromIsoString 
+                            |> Date.fromIsoString
                             |> Decode.fromResult
                     )
             )
@@ -56,4 +63,4 @@ entryDecoder =
 
 tagDecoder : Decode.Decoder Tag
 tagDecoder =
-    Decode.map Tag (Decode.field "name" Decode.string)
+    Decode.map2 Tag (Decode.field "id" Decode.string) (Decode.field "name" Decode.string)

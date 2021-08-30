@@ -1,19 +1,22 @@
-module Page.Index exposing (Data, Model, Msg, page, publishedDateView)
+module Page.Blog.Category.Tag_ exposing (..)
 
 import Article exposing (..)
-import DataSource exposing (DataSource)
+import Css exposing (static)
+import DataSource
 import Date exposing (..)
 import Element exposing (..)
-import Element.Background
+import Element.Background exposing (..)
 import Element.Border
-import Element.Region exposing (description)
+import Element.Font as Font
 import Head
 import Head.Seo as Seo
+import Html.Parser as Parser
+import Html.Parser.Util as ParserUtil
+import List.Extra exposing (unique)
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
-import Shared
-import String exposing (left)
+import Shared exposing (Msg)
 import View exposing (View)
 
 
@@ -26,21 +29,44 @@ type alias Msg =
 
 
 type alias RouteParams =
-    {}
+    { tag : String }
 
 
 page : Page RouteParams Data
 page =
-    Page.single
+    Page.prerender
         { head = head
         , data = data
+        , routes = routes
         }
         |> Page.buildNoState { view = view }
 
 
-data : DataSource Data
-data =
+routes : DataSource.DataSource (List RouteParams)
+routes =
     Article.allPosts
+        |> DataSource.map (List.map (\post -> post.tags))
+        |> DataSource.map List.concat
+        |> DataSource.map (List.map (\tag -> tag.id))
+        |> DataSource.map unique
+        |> DataSource.map (List.map (\id -> { tag = id }))
+
+
+data : RouteParams -> DataSource.DataSource Data
+data route =
+    Article.allPosts
+        |> DataSource.map
+            (\allPost ->
+                List.filter
+                    (\post ->
+                        List.member route.tag
+                            (List.map
+                                (\tag -> tag.id)
+                                post.tags
+                            )
+                    )
+                    allPost
+            )
 
 
 head :
@@ -49,7 +75,7 @@ head :
 head static =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = "elm-pages"
+        , siteName = static.routeParams.tag ++ " | TestBlog"
         , image =
             { url = Pages.Url.external "TODO"
             , alt = "elm-pages logo"
@@ -117,12 +143,3 @@ publishedDateView metadata =
     Element.el
         []
         (text (Date.format "yyy-MM-dd" metadata.published))
-
-
-summaryView : String -> Element msg
-summaryView summary =
-    if String.length summary > 30 then
-        Element.text <| left 30 summary ++ "..."
-
-    else
-        Element.text summary

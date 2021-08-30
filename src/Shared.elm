@@ -2,15 +2,18 @@ module Shared exposing (Data, Model, Msg(..), SharedMsg(..), template)
 
 import Browser.Navigation
 import DataSource
-import Element exposing (Element, column)
+import Date exposing (Date)
+import Element exposing (Element, column, layout, link, row, spaceEvenly, text)
+import Element.Background exposing (..)
+import Element.Font as Font exposing (Font)
+import Element.Region exposing (navigation)
+import Html exposing (Html)
 import Pages.Flags exposing (Flags)
 import Pages.PageUrl exposing (PageUrl)
 import Path exposing (Path)
 import Route exposing (Route)
 import SharedTemplate exposing (SharedTemplate)
 import View exposing (View)
-import Html exposing (Html)
-import Element exposing (layout)
 
 
 template : SharedTemplate Msg Model Data msg
@@ -97,6 +100,65 @@ view :
     -> View msg
     -> { body : Html msg, title : String }
 view _ _ _ _ pageView =
-    { body = layout [] (column [] pageView.body)
+    { body =
+        layout
+            [ Element.width (Element.fill |> Element.minimum 400)
+            , Element.height Element.fill
+            , Element.explain Debug.todo
+            ]
+            (column
+                [ Element.width Element.fill
+                ]
+                [ header
+                , bodyWrapper pageView.body
+                ]
+            )
     , title = pageView.title
     }
+
+
+bodyWrapper : List (Element msg) -> Element msg
+bodyWrapper body =
+    Element.column
+        [ Element.width Element.fill
+        , Element.paddingEach { top = 40, bottom = 40, left = 100, right = 100 }
+        , Element.explain Debug.todo
+        ]
+        body
+
+
+header : Element msg
+header =
+    Element.row
+        [ Element.width (Element.fill |> Element.minimum 400)
+        , Element.height (Element.px 60)
+        , Element.spaceEvenly
+        , Element.padding 10
+        , Element.Background.color (Element.rgb 0 0.5 0)
+        , Element.explain Debug.todo
+        ]
+        [ Element.el
+            [ Font.bold
+            , Font.size 30
+            ]
+            (link [] { url = "/?tagName=eeeee", label = text "Blog" } )
+        , menu
+        ]
+
+
+menu : Element msg
+menu =
+    row
+        [ navigation
+        , Element.spacing 40
+        ]
+        [ link [] { url = "/?tagName=aaaa", label = text "Posts" }
+        , link [] { url = "/about", label = text "About" }
+        ]
+
+
+publishedDateView : { a | published : Date } -> Element msg
+publishedDateView metadata =
+    Element.el
+        []
+        (text (Date.format "yyy-MM-dd" metadata.published))

@@ -4,6 +4,10 @@ import Article exposing (..)
 import Css exposing (static)
 import DataSource
 import Date exposing (..)
+import Element exposing (..)
+import Element.Background as Background exposing (..)
+import Element.Font as Font exposing (Font)
+import Element.Region as Region
 import Head
 import Head.Seo as Seo
 import Html.Parser as Parser
@@ -13,8 +17,6 @@ import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
 import View exposing (View)
-import Element exposing (..)
-import Element.Region as Region
 
 
 type alias Model =
@@ -108,9 +110,24 @@ view _ _ static =
 
 viewPost : Entry -> Element Msg
 viewPost entry =
-    column []
-        [ el [ Region.heading 1] (text entry.title)
-        , column [] (textHtml entry.body)
+    column
+        [ Element.width Element.fill
+        , Element.explain Debug.todo
+        ]
+        [ viewTitle entry.title
+        , publishedDateView entry.published
+        , viewTags entry.tags
+        , column
+            [ Element.width Element.fill
+            ]
+            (textHtml entry.body)
+        ]
+
+
+viewTitle : String -> Element Msg
+viewTitle title =
+    Element.row [ Element.centerX, Font.size 50, Font.bold ]
+        [ Element.text title
         ]
 
 
@@ -122,3 +139,28 @@ textHtml t =
 
         Err _ ->
             []
+
+
+publishedDateView : Date -> Element msg
+publishedDateView date =
+    Element.row
+        [ Font.size 20
+        ]
+        [ text (Date.format "yyy-MM-dd" date) ]
+
+
+viewTags : List Tag -> Element msg
+viewTags tags =
+    Element.row
+        [ Element.padding 3
+        ]
+        (List.map
+            (\tag ->
+                el
+                    [ Element.padding 3
+                    , Background.color (Element.rgb 20 0 0)
+                    ]
+                    (text tag.name)
+            )
+            tags
+        )
