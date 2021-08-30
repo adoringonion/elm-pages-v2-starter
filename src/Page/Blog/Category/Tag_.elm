@@ -14,6 +14,7 @@ import Html.Parser as Parser
 import Html.Parser.Util as ParserUtil
 import List.Extra exposing (unique)
 import Page exposing (Page, StaticPayload)
+import Page.Index exposing (viewArticle)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
@@ -102,44 +103,3 @@ view maybeUrl sharedModel static =
     { title = "Index"
     , body = List.map viewArticle static.data
     }
-
-
-viewArticle : Article.Entry -> Element msg
-viewArticle entry =
-    Element.link
-        [ Element.Background.color (Element.rgb 200 0 0)
-        , Element.padding 10
-        , Element.explain Debug.todo
-        , Element.Border.rounded 5
-        ]
-        { url = "/blog/" ++ entry.id
-        , label =
-            Element.row
-                []
-                [ Element.column []
-                    [ Element.text entry.title
-                    , publishedDateView entry
-                    , viewTags entry.tags
-                    ]
-                ]
-        }
-
-
-viewTags : List Tag -> Element msg
-viewTags tags =
-    Element.row
-        []
-        (List.map
-            (\tag ->
-                el []
-                    (text tag.name)
-            )
-            tags
-        )
-
-
-publishedDateView : { a | published : Date } -> Element msg
-publishedDateView metadata =
-    Element.el
-        []
-        (text (Date.format "yyy-MM-dd" metadata.published))

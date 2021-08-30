@@ -17,6 +17,7 @@ import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
 import View exposing (View)
+import Route
 
 
 type alias Model =
@@ -156,11 +157,11 @@ viewTags tags =
         ]
         (List.map
             (\tag ->
-                el
+                Element.link
                     [ Element.padding 3
                     , Background.color (Element.rgb 20 0 0)
                     ]
-                    (text tag.name)
+                    { url = "/blog/category/" ++ tag.id, label = text tag.name }
             )
             tags
         )

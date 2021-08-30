@@ -1,4 +1,4 @@
-module Page.Index exposing (Data, Model, Msg, page, publishedDateView)
+module Page.Index exposing (Data, Model, Msg, page, publishedDateView, viewTags, viewArticle)
 
 import Article exposing (..)
 import DataSource exposing (DataSource)

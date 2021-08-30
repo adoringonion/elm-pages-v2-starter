@@ -141,7 +141,7 @@ header =
             [ Font.bold
             , Font.size 30
             ]
-            (link [] { url = "/?tagName=eeeee", label = text "Blog" } )
+            (link [] { url = "/?tagName=eeeee", label = text "Blog" })
         , menu
         ]
 
@@ -152,7 +152,7 @@ menu =
         [ navigation
         , Element.spacing 40
         ]
-        [ link [] { url = "/?tagName=aaaa", label = text "Posts" }
+        [ link [] { url = "/", label = text "Posts" }
         , link [] { url = "/about", label = text "About" }
         ]
 
