@@ -1,4 +1,4 @@
-module Page.Blog.Slug_ exposing (..)
+module Page.Blog.Post.Slug_ exposing (..)
 
 import Article exposing (..)
 import Css exposing (static)
