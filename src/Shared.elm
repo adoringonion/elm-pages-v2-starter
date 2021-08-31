@@ -103,28 +103,15 @@ view _ _ _ _ pageView =
     { body =
         layout
             [ Element.width (Element.fill |> Element.minimum 400)
-            , Element.height Element.fill
             , Element.explain Debug.todo
             ]
             (column
                 [ Element.width Element.fill
                 ]
-                [ header
-                , bodyWrapper pageView.body
-                ]
+                ([ header ] ++ pageView.body)
             )
     , title = pageView.title
     }
-
-
-bodyWrapper : List (Element msg) -> Element msg
-bodyWrapper body =
-    Element.column
-        [ Element.width Element.fill
-        , Element.paddingEach { top = 40, bottom = 40, left = 100, right = 100 }
-        , Element.explain Debug.todo
-        ]
-        body
 
 
 header : Element msg
@@ -141,7 +128,7 @@ header =
             [ Font.bold
             , Font.size 30
             ]
-            (link [] { url = "/?tagName=eeeee", label = text "Blog" })
+            (text "MyBlog")
         , menu
         ]
 

@@ -76,7 +76,7 @@ head :
 head static =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = static.routeParams.tag ++ " | TestBlog"
+        , siteName = static.routeParams.tag ++ " | Blog"
         , image =
             { url = Pages.Url.external "TODO"
             , alt = "elm-pages logo"
@@ -100,6 +100,6 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    { title = "Index"
+    { title = static.routeParams.tag ++ " | Blog"
     , body = List.map viewArticle static.data
     }

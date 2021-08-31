@@ -33,7 +33,7 @@ type alias RouteParams =
     {}
 
 
-init : Maybe PageUrl -> Shared.Model -> StaticPayload templateData routeParams -> ( Model, Cmd Msg )
+init : Maybe PageUrl -> Shared.Model -> StaticPayload Data RouteParams -> ( Model, Cmd Msg )
 init _ _ _ =
     ( 1, Cmd.none )
 
@@ -112,22 +112,34 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel model static =
-    { title = "Index"
-    , body = [ articleColumn static.data model ]
+    { title = "MyBlog"
+    , body = [ wrapper static.data model ]
     }
 
 
-articleColumn : List Entry -> Int -> Element Msg
-articleColumn entries int =
+wrapper : List Entry -> Model -> Element Msg
+wrapper entries model =
+    Element.row
+        [ Element.paddingXY 50 70
+        , Element.width Element.fill
+        , Element.explain Debug.todo
+        ]
+        [ articleColumn entries model ]
+
+
+articleColumn : List Entry -> Model -> Element Msg
+articleColumn entries model =
     Element.column
-        [ Element.explain Debug.todo ]
-        (List.map viewArticle (List.take int entries) ++ [ nextButton ])
+        [ centerX, Element.width (Element.fill |> Element.maximum 800), Element.spacing 20 ]
+        (List.map viewArticle (List.take model entries) ++ [ nextButton ])
 
 
 nextButton : Element Msg
 nextButton =
-    button []
-        { onPress = Just NextPage, label = text "Next" }
+    Element.row [ Element.explain Debug.todo, Element.width Element.fill ]
+        [ button [ Element.padding 10, Element.centerX ]
+            { onPress = Just NextPage, label = text "More" }
+        ]
 
 
 viewArticle : Article.Entry -> Element msg
@@ -137,12 +149,16 @@ viewArticle entry =
         , Element.padding 10
         , Element.explain Debug.todo
         , Element.Border.rounded 5
+        , Element.width Element.fill
+        , Element.height <| Element.px 150
         ]
         { url = "/blog/post/" ++ entry.id
         , label =
             Element.row
                 []
-                [ Element.column []
+                [ Element.column
+                    [ Element.width Element.fill
+                    ]
                     [ Element.text entry.title
                     , publishedDateView entry
                     , viewTags entry.tags
