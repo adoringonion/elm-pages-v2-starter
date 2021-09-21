@@ -7,14 +7,11 @@ import Date exposing (..)
 import Element exposing (..)
 import Element.Background exposing (..)
 import Element.Border
-import Element.Font as Font
+import Element.Font
 import Head
 import Head.Seo as Seo
-import Html.Parser as Parser
-import Html.Parser.Util as ParserUtil
 import List.Extra exposing (unique)
 import Page exposing (Page, StaticPayload)
-import Page.Index exposing (viewArticle)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
@@ -101,5 +98,77 @@ view :
     -> View Msg
 view maybeUrl sharedModel static =
     { title = static.routeParams.tag ++ " | Blog"
-    , body = List.map viewArticle static.data
+    , body = [wrapper static.data]
     }
+
+
+wrapper : List Entry -> Element Msg
+wrapper entries =
+    Element.row
+        [ Element.paddingXY 50 70
+        , Element.width Element.fill
+        ]
+        [ articleColumn entries ]
+
+
+articleColumn : List Entry -> Element Msg
+articleColumn entries =
+    Element.column
+        [ centerX, Element.width (Element.fill |> Element.maximum 800 |> Element.minimum 300), Element.spacing 20 ]
+        (List.map viewArticle entries)
+
+
+viewArticle : Article.Entry -> Element msg
+viewArticle entry =
+    Element.link
+        [ Element.Background.color (Element.rgb 200 0 0)
+        , Element.padding 10
+        , Element.Border.rounded 5
+        , Element.width Element.fill
+        , Element.height <| Element.px 150
+        ]
+        { url = "/blog/post/" ++ entry.id
+        , label =
+            Element.row
+                []
+                [ Element.textColumn
+                    [ Element.padding 20, Element.spacing 10 ]
+                    [ Element.paragraph
+                        [ Element.Font.size 23
+                        , Element.Font.semiBold
+                        ]
+                        [ text entry.title ]
+                    , publishedDateView entry
+                    , viewTags entry.tags
+                    ]
+                ]
+        }
+
+
+viewTags : List Tag -> Element msg
+viewTags tags =
+    let
+        pickOutTags =
+            List.take 5 tags
+    in
+    Element.row
+        []
+        (List.map
+            (\tag ->
+                el
+                    [ Element.Border.solid
+                    , Element.Border.width 1
+                    , Element.Border.rounded 10
+                    , Element.padding 5
+                    ]
+                    (text tag.name)
+            )
+            pickOutTags
+        )
+
+
+publishedDateView : { a | published : Date } -> Element msg
+publishedDateView metadata =
+    Element.el
+        [ Element.Font.size 16 ]
+        (text (Date.format "yyy-MM-dd" metadata.published))

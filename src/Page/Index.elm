@@ -1,4 +1,4 @@
-module Page.Index exposing (Data, Model, Msg, page, publishedDateView, viewArticle, viewTags)
+module Page.Index exposing (..)
 
 import Article exposing (..)
 import Browser.Navigation exposing (Key)
@@ -19,6 +19,7 @@ import Path exposing (Path)
 import Shared
 import String exposing (left)
 import View exposing (View)
+import Element.Font
 
 
 type alias Model =
@@ -122,7 +123,6 @@ wrapper entries model =
     Element.row
         [ Element.paddingXY 50 70
         , Element.width Element.fill
-        , Element.explain Debug.todo
         ]
         [ articleColumn entries model ]
 
@@ -130,16 +130,19 @@ wrapper entries model =
 articleColumn : List Entry -> Model -> Element Msg
 articleColumn entries model =
     Element.column
-        [ centerX, Element.width (Element.fill |> Element.maximum 800), Element.spacing 20 ]
-        (List.map viewArticle (List.take model entries) ++ [ nextButton ])
+        [ centerX, Element.width (Element.fill |> Element.maximum 800 |> Element.minimum 300), Element.spacing 20 ]
+        (List.map viewArticle (List.take model entries) ++ [ nextButton entries model ])
 
 
-nextButton : Element Msg
-nextButton =
-    Element.row [ Element.explain Debug.todo, Element.width Element.fill ]
-        [ button [ Element.padding 10, Element.centerX ]
-            { onPress = Just NextPage, label = text "More" }
-        ]
+nextButton : List Entry -> Model -> Element Msg
+nextButton entries model =
+    if model >= List.length entries then
+        Element.none
+    else
+        Element.row [ Element.explain Debug.todo, Element.width Element.fill ]
+            [ button [ Element.padding 10, Element.centerX ]
+                { onPress = Just NextPage, label = text "More" }
+            ]
 
 
 viewArticle : Article.Entry -> Element msg
@@ -147,7 +150,6 @@ viewArticle entry =
     Element.link
         [ Element.Background.color (Element.rgb 200 0 0)
         , Element.padding 10
-        , Element.explain Debug.todo
         , Element.Border.rounded 5
         , Element.width Element.fill
         , Element.height <| Element.px 150
@@ -156,10 +158,12 @@ viewArticle entry =
         , label =
             Element.row
                 []
-                [ Element.column
-                    [ Element.width Element.fill
-                    ]
-                    [ Element.text entry.title
+                [ Element.textColumn
+                    [ Element.padding 20, Element.spacing 10]
+                    [ Element.paragraph [
+                        Element.Font.size 23
+                        , Element.Font.semiBold
+                    ] [ text entry.title ]
                     , publishedDateView entry
                     , viewTags entry.tags
                     ]
@@ -169,19 +173,28 @@ viewArticle entry =
 
 viewTags : List Tag -> Element msg
 viewTags tags =
+    let
+        pickOutTags = List.take 5 tags
+    in
+    
     Element.row
         []
         (List.map
             (\tag ->
-                el []
+                el [
+                    Element.Border.solid
+                    , Element.Border.width 1
+                    , Element.Border.rounded 10
+                    , Element.padding 5
+                ]
                     (text tag.name)
             )
-            tags
+            pickOutTags
         )
 
 
 publishedDateView : { a | published : Date } -> Element msg
 publishedDateView metadata =
     Element.el
-        []
+        [Element.Font.size 16]
         (text (Date.format "yyy-MM-dd" metadata.published))

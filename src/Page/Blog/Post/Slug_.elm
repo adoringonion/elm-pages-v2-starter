@@ -12,12 +12,13 @@ import Head
 import Head.Seo as Seo
 import Html.Parser as Parser
 import Html.Parser.Util as ParserUtil
+import Markdown
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
+import Route
 import Shared exposing (Msg)
 import View exposing (View)
-import Route
 
 
 type alias Model =
@@ -114,32 +115,37 @@ viewPost entry =
     column
         [ Element.width Element.fill
         , Element.explain Debug.todo
+        , Element.paddingXY 0 50
         ]
         [ viewTitle entry.title
         , publishedDateView entry.published
         , viewTags entry.tags
         , column
-            [ Element.width Element.fill
+            [ Element.width (Element.fill |> Element.maximum 1000)
+            , Element.centerX
+            , Element.paddingXY 30 0
             ]
-            (textHtml entry.body)
+            [ postBody entry.body ]
+        ]
+
+
+postBody : String -> Element Msg
+postBody body =
+    Element.paragraph
+        [ Element.explain Debug.todo
+        , Element.width Element.fill
+        , Background.color (rgba 20 0 0 0.4)
+        ]
+        [ Element.html
+            (Markdown.toHtml [] body)
         ]
 
 
 viewTitle : String -> Element Msg
 viewTitle title =
-    Element.row [ Element.centerX, Font.size 50, Font.bold ]
+    Element.paragraph [ Element.centerX, Font.center, Font.size 40, Font.bold, Element.width (Element.fill |> Element.maximum 1000) ]
         [ Element.text title
         ]
-
-
-textHtml : String -> List (Element msg)
-textHtml t =
-    case Parser.run t of
-        Ok nodes ->
-            List.map html (ParserUtil.toVirtualDom nodes)
-
-        Err _ ->
-            []
 
 
 publishedDateView : Date -> Element msg

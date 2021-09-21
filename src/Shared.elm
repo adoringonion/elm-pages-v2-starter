@@ -108,7 +108,7 @@ view _ _ _ _ pageView =
             (column
                 [ Element.width Element.fill
                 ]
-                ([ header ] ++ pageView.body)
+                ([ header ] ++ pageView.body ++ [ footer ])
             )
     , title = pageView.title
     }
@@ -117,7 +117,7 @@ view _ _ _ _ pageView =
 header : Element msg
 header =
     Element.row
-        [ Element.width (Element.fill |> Element.minimum 400)
+        [ Element.width Element.fill
         , Element.height (Element.px 60)
         , Element.spaceEvenly
         , Element.padding 10
@@ -149,3 +149,13 @@ publishedDateView metadata =
     Element.el
         []
         (text (Date.format "yyy-MM-dd" metadata.published))
+
+
+footer : Element msg
+footer =
+    Element.row
+        [ Element.width Element.fill
+        , Element.height (Element.px 60)
+        , Element.Background.color (Element.rgb 0 40 0)
+        ]
+        []
