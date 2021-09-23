@@ -3,8 +3,9 @@ module Shared exposing (Data, Model, Msg(..), SharedMsg(..), template)
 import Browser.Navigation
 import DataSource
 import Date exposing (Date)
-import Element exposing (Element, column, layout, link, row, spaceEvenly, text)
+import Element exposing (Element, column, layout, link, row, text)
 import Element.Background exposing (..)
+import Element.Border
 import Element.Font as Font exposing (Font)
 import Element.Region exposing (navigation)
 import Html exposing (Html)
@@ -102,13 +103,11 @@ view :
 view _ _ _ _ pageView =
     { body =
         layout
-            [ Element.width (Element.fill |> Element.minimum 400)
-            , Element.explain Debug.todo
+            [ Element.width (Element.fill |> Element.minimum 700)
             ]
             (column
-                [ Element.width Element.fill
-                ]
-                ([ header ] ++ pageView.body ++ [ footer ])
+                [ Element.width Element.fill ]
+                (header :: pageView.body)
             )
     , title = pageView.title
     }
@@ -120,9 +119,8 @@ header =
         [ Element.width Element.fill
         , Element.height (Element.px 60)
         , Element.spaceEvenly
-        , Element.padding 10
-        , Element.Background.color (Element.rgb 0 0.5 0)
-        , Element.explain Debug.todo
+        , Element.paddingXY 30 10
+        , Element.Border.shadow { blur = 5, size = 1, offset = ( 0, 0 ), color = Element.rgba 0 0 0 0.3 }
         ]
         [ Element.el
             [ Font.bold
@@ -142,20 +140,3 @@ menu =
         [ link [] { url = "/", label = text "Posts" }
         , link [] { url = "/about", label = text "About" }
         ]
-
-
-publishedDateView : { a | published : Date } -> Element msg
-publishedDateView metadata =
-    Element.el
-        []
-        (text (Date.format "yyy-MM-dd" metadata.published))
-
-
-footer : Element msg
-footer =
-    Element.row
-        [ Element.width Element.fill
-        , Element.height (Element.px 60)
-        , Element.Background.color (Element.rgb 0 40 0)
-        ]
-        []

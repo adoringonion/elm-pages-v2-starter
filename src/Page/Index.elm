@@ -8,6 +8,7 @@ import Date exposing (..)
 import Element exposing (..)
 import Element.Background
 import Element.Border
+import Element.Font
 import Element.Input exposing (button)
 import Element.Region exposing (description)
 import Head
@@ -19,7 +20,6 @@ import Path exposing (Path)
 import Shared
 import String exposing (left)
 import View exposing (View)
-import Element.Font
 
 
 type alias Model =
@@ -27,7 +27,7 @@ type alias Model =
 
 
 type Msg
-    = NextPage
+    = MorePosts
 
 
 type alias RouteParams =
@@ -59,7 +59,7 @@ update :
     -> ( Model, Cmd Msg )
 update _ _ _ _ msg model =
     case msg of
-        NextPage ->
+        MorePosts ->
             ( model + 1, Cmd.none )
 
 
@@ -114,56 +114,55 @@ view :
     -> View Msg
 view maybeUrl sharedModel model static =
     { title = "MyBlog"
-    , body = [ wrapper static.data model ]
+    , body = [ articleColumn static.data model ]
     }
-
-
-wrapper : List Entry -> Model -> Element Msg
-wrapper entries model =
-    Element.row
-        [ Element.paddingXY 50 70
-        , Element.width Element.fill
-        ]
-        [ articleColumn entries model ]
 
 
 articleColumn : List Entry -> Model -> Element Msg
 articleColumn entries model =
-    Element.column
-        [ centerX, Element.width (Element.fill |> Element.maximum 800 |> Element.minimum 300), Element.spacing 20 ]
-        (List.map viewArticle (List.take model entries) ++ [ nextButton entries model ])
+    Element.row
+        [ Element.paddingXY 50 70
+        , Element.width Element.fill
+        ]
+        [ Element.column
+            [ centerX, Element.width (Element.fill |> Element.maximum 600), Element.spacing 20 ]
+            (List.map articleCard (List.take model entries) ++ [ morePostsButton entries model ])
+        ]
 
 
-nextButton : List Entry -> Model -> Element Msg
-nextButton entries model =
+morePostsButton : List Entry -> Model -> Element Msg
+morePostsButton entries model =
     if model >= List.length entries then
         Element.none
+
     else
-        Element.row [ Element.explain Debug.todo, Element.width Element.fill ]
-            [ button [ Element.padding 10, Element.centerX ]
-                { onPress = Just NextPage, label = text "More" }
+        Element.row [ Element.width Element.fill ]
+            [ button [ Element.padding 10, Element.centerX, Element.Font.semiBold, Element.Font.size 30 ]
+                { onPress = Just MorePosts, label = text "More" }
             ]
 
 
-viewArticle : Article.Entry -> Element msg
-viewArticle entry =
+articleCard : Article.Entry -> Element msg
+articleCard entry =
     Element.link
-        [ Element.Background.color (Element.rgb 200 0 0)
-        , Element.padding 10
+        [ Element.padding 10
         , Element.Border.rounded 5
         , Element.width Element.fill
-        , Element.height <| Element.px 150
+        , Element.Border.color (Element.rgba 0 0 0 0.2)
+        , Element.Border.solid
+        , Element.Border.width 1
         ]
         { url = "/blog/post/" ++ entry.id
         , label =
             Element.row
                 []
                 [ Element.textColumn
-                    [ Element.padding 20, Element.spacing 10]
-                    [ Element.paragraph [
-                        Element.Font.size 23
+                    [ Element.padding 20, Element.spacing 10 ]
+                    [ Element.paragraph
+                        [ Element.Font.size 23
                         , Element.Font.semiBold
-                    ] [ text entry.title ]
+                        ]
+                        [ text entry.title]
                     , publishedDateView entry
                     , viewTags entry.tags
                     ]
@@ -173,28 +172,24 @@ viewArticle entry =
 
 viewTags : List Tag -> Element msg
 viewTags tags =
-    let
-        pickOutTags = List.take 5 tags
-    in
-    
     Element.row
-        []
+        [ Element.spacing 10
+        ]
         (List.map
             (\tag ->
-                el [
-                    Element.Border.solid
-                    , Element.Border.width 1
-                    , Element.Border.rounded 10
-                    , Element.padding 5
-                ]
-                    (text tag.name)
+                el
+                    [ 
+                    Element.padding 7
+                    , Element.Font.center
+                    ]
+                    (text ( "#" ++ tag.name))
             )
-            pickOutTags
+            (List.take 5 tags)
         )
 
 
 publishedDateView : { a | published : Date } -> Element msg
 publishedDateView metadata =
-    Element.el
-        [Element.Font.size 16]
-        (text (Date.format "yyy-MM-dd" metadata.published))
+    Element.paragraph
+        [ Element.Font.size 16 ]
+        [ text (Date.format "yyy-MM-dd" metadata.published) ]

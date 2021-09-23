@@ -7,7 +7,6 @@ import Date exposing (..)
 import Element exposing (..)
 import Element.Background as Background exposing (..)
 import Element.Font as Font exposing (Font)
-import Element.Region as Region
 import Head
 import Head.Seo as Seo
 import Html.Parser as Parser
@@ -105,7 +104,7 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view _ _ static =
-    { title = static.data.title ++ " | TestBlog"
+    { title = static.data.title ++ " | MyBlog"
     , body = [ viewPost static.data ]
     }
 
@@ -113,28 +112,36 @@ view _ _ static =
 viewPost : Entry -> Element Msg
 viewPost entry =
     column
-        [ Element.width Element.fill
-        , Element.explain Debug.todo
+        [ Element.width (Element.fill |> Element.maximum 1000)
+        , Element.centerX
         , Element.paddingXY 0 50
         ]
         [ viewTitle entry.title
-        , publishedDateView entry.published
-        , viewTags entry.tags
+        , dateAndTags entry.published entry.tags
         , column
-            [ Element.width (Element.fill |> Element.maximum 1000)
-            , Element.centerX
-            , Element.paddingXY 30 0
+            [ Element.centerX
+            , Element.paddingXY 30 20
             ]
             [ postBody entry.body ]
+        ]
+
+
+dateAndTags : Date -> List Tag -> Element Msg
+dateAndTags published tags =
+    Element.column
+        [ Element.width Element.fill
+        , Element.paddingXY 60 0
+        , Element.spacing 10
+        ]
+        [ publishedDateView published
+        , viewTags tags
         ]
 
 
 postBody : String -> Element Msg
 postBody body =
     Element.paragraph
-        [ Element.explain Debug.todo
-        , Element.width Element.fill
-        , Background.color (rgba 20 0 0 0.4)
+        [ Element.width Element.fill
         ]
         [ Element.html
             (Markdown.toHtml [] body)
@@ -143,7 +150,12 @@ postBody body =
 
 viewTitle : String -> Element Msg
 viewTitle title =
-    Element.paragraph [ Element.centerX, Font.center, Font.size 40, Font.bold, Element.width (Element.fill |> Element.maximum 1000) ]
+    Element.paragraph
+        [ Font.center
+        , Font.size 40
+        , Font.bold
+        , Element.width Element.fill
+        ]
         [ Element.text title
         ]
 
@@ -165,9 +177,8 @@ viewTags tags =
             (\tag ->
                 Element.link
                     [ Element.padding 3
-                    , Background.color (Element.rgb 20 0 0)
                     ]
-                    { url = "/blog/category/" ++ tag.id, label = text tag.name }
+                    { url = "/blog/category/" ++ tag.id, label = text ("#" ++ tag.name) }
             )
             tags
         )

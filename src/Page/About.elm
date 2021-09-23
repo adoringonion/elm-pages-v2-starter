@@ -9,9 +9,9 @@ import Head.Seo as Seo
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
+import Path
 import Shared
 import View exposing (View)
-import Element exposing (..)
 
 
 type alias Model =
@@ -71,8 +71,52 @@ view :
     -> View Msg
 view maybeUrl sharedModel static =
     { title = "About"
-    , body = [Element.none]
+    , body = [ content ]
     }
 
 
+content : Element Msg
+content =
+    Element.column
+        [ Element.paddingXY 20 10
+        , Element.explain Debug.todo
+        , Element.padding 50
+        , Element.width Element.fill
+        ]
+        [ introduction
+        , carreer
+        , links
+        ]
 
+
+introduction : Element Msg
+introduction =
+    Element.row
+        [ Element.explain Debug.todo
+        , Element.width Element.fill
+        ]
+        [ Element.textColumn []
+            [ Element.text "John Do"
+            , Element.text "名前 森田文人"
+            ]
+        , Element.image [
+            Element.width (Element.fill |> Element.maximum 300)
+        ]
+            { src = "images/profile.jpg", description = "John Do" }
+        ]
+
+
+carreer : Element Msg
+carreer =
+    Element.column
+        [ Element.width Element.fill
+        ]
+        []
+
+
+links : Element Msg
+links =
+    Element.column
+        [ Element.width Element.fill
+        ]
+        []
