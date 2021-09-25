@@ -1,16 +1,17 @@
-module Page.Blog.Slug_ exposing (..)
+module Page.Blog.Post.Slug_ exposing (..)
 
 import Article exposing (..)
 import Css exposing (static)
 import DataSource
 import Date exposing (..)
+import Element exposing (..)
+import Element.Background as Background exposing (..)
+import Element.Font as Font exposing (Font)
 import Head
 import Head.Seo as Seo
-import Html exposing (Html, div, h1, p, text)
 import Html.Parser as Parser
 import Html.Parser.Util as ParserUtil
 import Markdown
-import Markdown.Config as Config
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
@@ -78,7 +79,7 @@ head :
 head static =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = static.data.title ++ " | TestBlog"
+        , siteName = ""
         , image =
             { url = Pages.Url.external "TODO"
             , alt = "elm-pages logo"
@@ -87,7 +88,7 @@ head static =
             }
         , description = "TODO"
         , locale = Nothing
-        , title = "TODO title" -- metadata.title -- TODO
+        , title = static.data.title ++ " | MyBlog" -- metadata.title -- TODO
         }
         |> Seo.website
 
@@ -102,24 +103,81 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view _ _ static =
-    { title = static.data.title ++ " | TestBlog"
+    { title = static.data.title ++ " | MyBlog"
     , body = [ viewPost static.data ]
     }
 
 
-viewPost : Entry -> Html Msg
+viewPost : Entry -> Element Msg
 viewPost entry =
-    div []
-        [ h1 [] [ text entry.title ]
-        , div [] (textHtml entry.body)
+    column
+        [ Element.width (Element.fill |> Element.maximum 1000)
+        , Element.centerX
+        , Element.paddingXY 0 50
+        ]
+        [ viewTitle entry.title
+        , dateAndTags entry.published entry.tags
+        , column
+            [ Element.centerX
+            , Element.paddingXY 30 20
+            ]
+            [ postBody entry.body ]
         ]
 
 
-textHtml : String -> List (Html.Html msg)
-textHtml t =
-    case Parser.run t of
-        Ok nodes ->
-            ParserUtil.toVirtualDom nodes
+dateAndTags : Date -> List Tag -> Element Msg
+dateAndTags published tags =
+    Element.column
+        [ Element.width Element.fill
+        , Element.paddingXY 60 0
+        , Element.spacing 10
+        ]
+        [ publishedDateView published
+        , viewTags tags
+        ]
 
-        Err _ ->
-            []
+
+postBody : String -> Element Msg
+postBody body =
+    Element.paragraph
+        [ Element.width Element.fill
+        ]
+        [ Element.html
+            (Markdown.toHtml [] body)
+        ]
+
+
+viewTitle : String -> Element Msg
+viewTitle title =
+    Element.paragraph
+        [ Font.center
+        , Font.size 40
+        , Font.bold
+        , Element.width Element.fill
+        ]
+        [ Element.text title
+        ]
+
+
+publishedDateView : Date -> Element msg
+publishedDateView date =
+    Element.row
+        [ Font.size 20
+        ]
+        [ text (Date.format "yyy-MM-dd" date) ]
+
+
+viewTags : List Tag -> Element msg
+viewTags tags =
+    Element.row
+        [ Element.padding 3
+        ]
+        (List.map
+            (\tag ->
+                Element.link
+                    [ Element.padding 3
+                    ]
+                    { url = "/blog/category/" ++ tag.id, label = text ("#" ++ tag.name) }
+            )
+            tags
+        )

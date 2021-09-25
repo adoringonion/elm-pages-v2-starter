@@ -1,0 +1,13 @@
+code {
+
+}
+
+pre {
+    background-color: rgb(20, 27, 65);
+    color: #c5dfe2;
+    padding: 10px;
+    overflow: scroll;
+    overflow-y: hidden;
+    font-size: medium;
+    border-radius: 5px;
+}

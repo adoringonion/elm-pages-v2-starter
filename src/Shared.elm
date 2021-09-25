@@ -2,8 +2,14 @@ module Shared exposing (Data, Model, Msg(..), SharedMsg(..), template)
 
 import Browser.Navigation
 import DataSource
+import Date exposing (Date)
+import Element exposing (Element, column, layout, link, row, text)
+import Element.Background exposing (..)
+import Element.Border
+import Element.Font as Font exposing (Font)
+import Element.Region exposing (navigation)
 import Html exposing (Html)
-import Pages.Flags
+import Pages.Flags exposing (Flags)
 import Pages.PageUrl exposing (PageUrl)
 import Path exposing (Path)
 import Route exposing (Route)
@@ -58,7 +64,7 @@ init :
             , pageUrl : Maybe PageUrl
             }
     -> ( Model, Cmd Msg )
-init navigationKey flags maybePagePath =
+init _ _ _ =
     ( { showMobileMenu = False }
     , Cmd.none
     )
@@ -70,7 +76,7 @@ update msg model =
         OnPageChange _ ->
             ( { model | showMobileMenu = False }, Cmd.none )
 
-        SharedMsg globalMsg ->
+        SharedMsg _ ->
             ( model, Cmd.none )
 
 
@@ -94,7 +100,43 @@ view :
     -> (Msg -> msg)
     -> View msg
     -> { body : Html msg, title : String }
-view sharedData page model toMsg pageView =
-    { body = Html.div [] pageView.body
+view _ _ _ _ pageView =
+    { body =
+        layout
+            [ Element.width (Element.fill |> Element.minimum 700)
+            ]
+            (column
+                [ Element.width Element.fill ]
+                (header :: pageView.body)
+            )
     , title = pageView.title
     }
+
+
+header : Element msg
+header =
+    Element.row
+        [ Element.width Element.fill
+        , Element.height (Element.px 60)
+        , Element.spaceEvenly
+        , Element.paddingXY 30 10
+        , Element.Border.shadow { blur = 5, size = 1, offset = ( 0, 0 ), color = Element.rgba 0 0 0 0.3 }
+        ]
+        [ Element.link
+            [ Font.bold
+            , Font.size 30
+            ]
+            { url = "/", label = text "MyBlog" }
+        , menu
+        ]
+
+
+menu : Element msg
+menu =
+    row
+        [ navigation
+        , Element.spacing 40
+        ]
+        [ link [] { url = "/", label = text "Posts" }
+        , link [] { url = "/about", label = text "About" }
+        ]
