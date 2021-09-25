@@ -1,4 +1,4 @@
-module Article exposing (Entry, Tag, allPosts)
+module Article exposing (Entry, Tag, allPosts, allTags)
 
 import DataSource
 import DataSource.Http
@@ -33,13 +33,28 @@ allPosts =
             )
             |> Secrets.with "API_KEY"
         )
-        decoder
+        (contentsDecoder entryDecoder)
+
+allTags : DataSource.DataSource (List Tag)
+allTags =
+    DataSource.Http.request
+        (Secrets.succeed
+            (\apiKey ->
+                { url = "https://adoringonion.microcms.io/api/v1/tags"
+                , method = "GET"
+                , headers = [ ( "X-API-KEY", apiKey ) ]
+                , body = DataSource.Http.emptyBody
+                }
+            )
+            |> Secrets.with "API_KEY"
+        )
+    (contentsDecoder tagDecoder)
 
 
-decoder : Decode.Decoder (List Entry)
-decoder =
+contentsDecoder : Decode.Decoder a -> Decode.Decoder (List a)
+contentsDecoder decoder =
     Decode.field "contents" <|
-        Decode.list entryDecoder
+        Decode.list decoder
 
 
 entryDecoder : Decode.Decoder Entry

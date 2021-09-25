@@ -122,11 +122,11 @@ header =
         , Element.paddingXY 30 10
         , Element.Border.shadow { blur = 5, size = 1, offset = ( 0, 0 ), color = Element.rgba 0 0 0 0.3 }
         ]
-        [ Element.el
+        [ Element.link
             [ Font.bold
             , Font.size 30
             ]
-            (text "MyBlog")
+            { url = "/", label = text "MyBlog" }
         , menu
         ]
 

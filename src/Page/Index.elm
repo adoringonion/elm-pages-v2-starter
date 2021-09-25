@@ -36,7 +36,7 @@ type alias RouteParams =
 
 init : Maybe PageUrl -> Shared.Model -> StaticPayload Data RouteParams -> ( Model, Cmd Msg )
 init _ _ _ =
-    ( 1, Cmd.none )
+    ( 10, Cmd.none )
 
 
 subscriptions :
@@ -60,7 +60,7 @@ update :
 update _ _ _ _ msg model =
     case msg of
         MorePosts ->
-            ( model + 1, Cmd.none )
+            ( model + 10, Cmd.none )
 
 
 page : PageWithState RouteParams Data Model Msg
@@ -88,7 +88,7 @@ head :
 head static =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = "elm-pages"
+        , siteName = ""
         , image =
             { url = Pages.Url.external "TODO"
             , alt = "elm-pages logo"
@@ -97,7 +97,7 @@ head static =
             }
         , description = "TODO"
         , locale = Nothing
-        , title = "TODO title" -- metadata.title -- TODO
+        , title = "MyBlog" -- metadata.title -- TODO
         }
         |> Seo.website
 

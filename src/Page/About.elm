@@ -16,7 +16,6 @@ import Shared
 import View exposing (View)
 import Css exposing (static)
 
-
 type alias Model =
     ()
 
@@ -84,10 +83,9 @@ view maybeUrl sharedModel static =
 aboutBody  : String -> Element Msg
 aboutBody body =
     Element.paragraph
-        [ Element.paddingXY 20 10
-        , Element.explain Debug.todo
-        , Element.padding 50
-        , Element.width Element.fill
+        [
+         Element.width Element.fill
+        , Element.paddingXY 100 40
         ]
         [ Element.html
             (Markdown.toHtml [] body)

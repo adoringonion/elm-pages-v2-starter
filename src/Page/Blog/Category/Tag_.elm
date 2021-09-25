@@ -12,10 +12,12 @@ import Head
 import Head.Seo as Seo
 import List.Extra exposing (unique)
 import Page exposing (Page, StaticPayload)
+import Page.Index exposing (articleCard)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Shared exposing (Msg)
 import View exposing (View)
+import DataSource exposing (DataSource)
 
 
 type alias Model =
@@ -42,30 +44,40 @@ page =
 
 routes : DataSource.DataSource (List RouteParams)
 routes =
-    Article.allPosts
-        |> DataSource.map (List.map (\post -> post.tags))
-        |> DataSource.map List.concat
-        |> DataSource.map (List.map (\tag -> tag.id))
-        |> DataSource.map unique
-        |> DataSource.map (List.map (\id -> { tag = id }))
+    Article.allTags
+        |> DataSource.map (List.map (\tag -> { tag = tag.id }))
 
 
 data : RouteParams -> DataSource.DataSource Data
 data route =
-    Article.allPosts
-        |> DataSource.map
-            (\allPost ->
-                List.filter
-                    (\post ->
-                        List.member route.tag
-                            (List.map
-                                (\tag -> tag.id)
-                                post.tags
+    let 
+        entries =
+            Article.allPosts
+                |> DataSource.map
+                    (\allPost ->
+                        List.filter
+                            (\post ->
+                                List.member route.tag
+                                    (List.map
+                                        (\tag -> tag.id)
+                                        post.tags
+                                    )
                             )
+                            allPost
                     )
-                    allPost
-            )
+        
+        tagName =
+            Article.allTags
+                |> DataSource.map
+                    (\allTags ->
+                        List.filter (\tag -> tag.id == route.tag) allTags
+                    )
+                |> DataSource.map List.head
+                |> DataSource.map (Maybe.map (\tag -> tag.name))
+                |> DataSource.map (Maybe.withDefault "")
+    in
 
+       DataSource.map2 Data entries tagName
 
 head :
     StaticPayload Data RouteParams
@@ -73,7 +85,7 @@ head :
 head static =
     Seo.summary
         { canonicalUrlOverride = Nothing
-        , siteName = static.routeParams.tag ++ " | Blog"
+        , siteName = ""
         , image =
             { url = Pages.Url.external "TODO"
             , alt = "elm-pages logo"
@@ -82,13 +94,13 @@ head static =
             }
         , description = "TODO"
         , locale = Nothing
-        , title = "TODO title" -- metadata.title -- TODO
+        , title = static.routeParams.tag ++ " | MyBlog" -- metadata.title -- TODO
         }
         |> Seo.website
 
 
 type alias Data =
-    List Entry
+    { entries : List Entry, tag : String }
 
 
 view :
@@ -97,78 +109,32 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    { title = static.routeParams.tag ++ " | Blog"
-    , body = [wrapper static.data]
+    { title = static.data.tag ++ " | Blog"
+    , body = [ wrapper static.data.entries static.data.tag ]
     }
 
 
-wrapper : List Entry -> Element Msg
-wrapper entries =
-    Element.row
+wrapper : List Entry -> String -> Element Msg
+wrapper entries tag =
+    Element.column
         [ Element.paddingXY 50 70
-        , Element.width Element.fill
+        , Element.width Element.fill 
+        , centerX
+        , Element.spacing 40
         ]
-        [ articleColumn entries ]
+        [ Element.el
+            [ Element.width Element.fill
+            , Element.Font.center
+            , Element.Font.semiBold
+            , Element.Font.size 36
+            ]
+            (Element.text ("#" ++ tag))
+        , articleColumn entries
+        ]
 
 
 articleColumn : List Entry -> Element Msg
 articleColumn entries =
     Element.column
-        [ centerX, Element.width (Element.fill |> Element.maximum 800 |> Element.minimum 300), Element.spacing 20 ]
-        (List.map viewArticle entries)
-
-
-viewArticle : Article.Entry -> Element msg
-viewArticle entry =
-    Element.link
-        [ Element.Background.color (Element.rgb 200 0 0)
-        , Element.padding 10
-        , Element.Border.rounded 5
-        , Element.width Element.fill
-        , Element.height <| Element.px 150
-        ]
-        { url = "/blog/post/" ++ entry.id
-        , label =
-            Element.row
-                []
-                [ Element.textColumn
-                    [ Element.padding 20, Element.spacing 10 ]
-                    [ Element.paragraph
-                        [ Element.Font.size 23
-                        , Element.Font.semiBold
-                        ]
-                        [ text entry.title ]
-                    , publishedDateView entry
-                    , viewTags entry.tags
-                    ]
-                ]
-        }
-
-
-viewTags : List Tag -> Element msg
-viewTags tags =
-    let
-        pickOutTags =
-            List.take 5 tags
-    in
-    Element.row
-        []
-        (List.map
-            (\tag ->
-                el
-                    [ Element.Border.solid
-                    , Element.Border.width 1
-                    , Element.Border.rounded 10
-                    , Element.padding 5
-                    ]
-                    (text tag.name)
-            )
-            pickOutTags
-        )
-
-
-publishedDateView : { a | published : Date } -> Element msg
-publishedDateView metadata =
-    Element.el
-        [ Element.Font.size 16 ]
-        (text (Date.format "yyy-MM-dd" metadata.published))
+        [ centerX, Element.width (Element.fill |> Element.maximum 600), Element.spacing 20 ]
+        (List.map Page.Index.articleCard entries)
