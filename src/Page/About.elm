@@ -2,16 +2,19 @@ module Page.About exposing (Data, Model, Msg, page)
 
 import Article exposing (..)
 import DataSource exposing (DataSource)
+import DataSource.File
 import Date exposing (..)
 import Element exposing (..)
 import Head
 import Head.Seo as Seo
+import Markdown
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
 import Path
 import Shared
 import View exposing (View)
+import Css exposing (static)
 
 
 type alias Model =
@@ -35,9 +38,9 @@ page =
         |> Page.buildNoState { view = view }
 
 
-data : DataSource Data
+data : DataSource String
 data =
-    Article.allPosts
+    DataSource.File.rawFile "content/about.md"
 
 
 head :
@@ -61,7 +64,7 @@ head static =
 
 
 type alias Data =
-    List Entry
+    String
 
 
 view :
@@ -71,52 +74,21 @@ view :
     -> View Msg
 view maybeUrl sharedModel static =
     { title = "About"
-    , body = [ content ]
+    , body = [ aboutBody static.data ]
     }
 
 
-content : Element Msg
-content =
-    Element.column
+
+
+
+aboutBody  : String -> Element Msg
+aboutBody body =
+    Element.paragraph
         [ Element.paddingXY 20 10
         , Element.explain Debug.todo
         , Element.padding 50
         , Element.width Element.fill
         ]
-        [ introduction
-        , carreer
-        , links
+        [ Element.html
+            (Markdown.toHtml [] body)
         ]
-
-
-introduction : Element Msg
-introduction =
-    Element.row
-        [ Element.explain Debug.todo
-        , Element.width Element.fill
-        ]
-        [ Element.textColumn []
-            [ Element.text "John Do"
-            , Element.text "名前 森田文人"
-            ]
-        , Element.image [
-            Element.width (Element.fill |> Element.maximum 300)
-        ]
-            { src = "images/profile.jpg", description = "John Do" }
-        ]
-
-
-carreer : Element Msg
-carreer =
-    Element.column
-        [ Element.width Element.fill
-        ]
-        []
-
-
-links : Element Msg
-links =
-    Element.column
-        [ Element.width Element.fill
-        ]
-        []
